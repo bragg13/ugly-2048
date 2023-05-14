@@ -1,0 +1,39 @@
+.tile {
+    border-style: solid;
+    width: var(--tile-size);
+    height: var(--tile-size);
+    border-width: var(--border-width);
+}
+
+.color-0 {
+    background-color: var(--color-0);
+    color: white
+}
+.color-2 {
+    background-color: var(--color-2);
+    color: white
+}
+.color-4 {
+    background-color: var(--color-4);
+    color: white
+}
+.color-8 {
+    background-color: var(--color-8);
+    color: white
+}
+.color-16 {
+    background-color: var(--color-16);
+    color: white
+}
+.color-32 {
+    background-color: var(--color-32);
+    color: white
+}
+.color-64 {
+    background-color: var(--color-64);
+    color: white
+}
+.color-128 {
+    background-color: var(--color-128);
+    color: white
+}

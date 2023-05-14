@@ -3,6 +3,7 @@ import { Paper } from "@mui/material";
 import GameOverScreen from "./components/GameOverScreen/GameOverScreen.jsx";
 import Header from "./components/Header/Header.jsx";
 import Game from "./components/Game/Game.jsx";
+import './App.css'
 
 function App() {
   const [isGameOver, setIsGameOver] = useState(false);
@@ -14,15 +15,10 @@ function App() {
   };
 
   return (
-    <>
-      <Paper>
+      <div className="game-container">
         {isGameOver && <GameOverScreen />}
-
-        <Header handleScore={handleScore} />
-
         <Game />
-      </Paper>
-    </>
+      </div>
   );
 }
 
