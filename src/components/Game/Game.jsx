@@ -6,7 +6,7 @@ import Tile from "../Tile/Tile";
 export default function Game(props) {
     const [board, setBoard] = useState([])
     const [emptyTiles, setEmptyTiles] = useState([])
-    const [gameStarted, setGameStarted] = useState(false)
+    const [gameOver, setGameOver] = useState(true)
 
     useEffect(() => {
         // initialise board
@@ -16,7 +16,6 @@ export default function Game(props) {
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 g[i].push({
-                    id: `${i}${j}`,
                     value: null
                 })
                 emptyTiles.push(`${i}${j}`)
@@ -29,26 +28,30 @@ export default function Game(props) {
         // push two random tiles
 
         // set game started
-        setGameStarted(true)
+        setGameOver(false)
     }, [])
 
     useEffect(() => {
         const keyPressHandler = (e) => {
-            if (!gameStarted) {
+            if (gameOver) {
                 return;
             }
             switch (e.keyCode) {
+                case 32:
+                    console.log('space')
+                    pushRandomToGrid()
+                    break;
                 case 37:
                     console.log('left')
                     slideLeft()
                     break;
                 case 38:
-                    console.log('right')
-                    pushRandomToGrid();
+                    console.log('up')
+                    console.log(board)
                     break;
                 case 39:
-                    console.log(board)
                     console.log('right')
+                    slideRight();
                     break;
                 case 40:
                     console.log('down')
@@ -70,21 +73,29 @@ export default function Game(props) {
         // remove element from empty tiles
         setEmptyTiles(curr => curr.filter(_tile => _tile !== tileId))
 
-        return tileId
+        return {tileI: tileId[0], tileJ: tileId[1]}
     }
 
     const pushRandomToGrid = () => {
-        let tile = getEmptyTile()
-        let newArr = board.map(row => row.map(cell => {
-            return (cell['id'] === tile)
-                ? { ...cell, value: 2 }
-                : cell
-        }))
+        let { tileI, tileJ } = getEmptyTile()
+        let newArr = [[],[],[],[]]
+        
+        for (let i=0; i<4; i++) {
+            for (let j=0; j<4; j++) {
+                if (i===tileI && j===tileJ) {
+                    newArr[i].push({value: 2})
+                } else {
+                    newArr[i].push(board[i][j])
+                }
+            }
+        }
         setBoard(newArr)
     }
 
     const slideLeft = () => {
         let newBoard = []
+        let newEmptyCells = []
+
         for (let row = 0; row < 4; row++) {
             console.log(`[row ${row}`)
 
@@ -97,9 +108,11 @@ export default function Game(props) {
                 // fill with null and push the row
                 for (let col = 0; col < 4; col++) {
                     compactedRow.push({
-                        id: `${row}${col}`,
+                        // id: `${row}${col}`,
                         value: null
                     })
+                    newEmptyCells.push(`${row}${col}`)
+
                 }
                 newBoard.push(compactedRow)
                 continue
@@ -109,15 +122,14 @@ export default function Game(props) {
             if (compactedRow.length === 1) {
                 console.log('length 1 - make it the leftmost')
 
-                // this got shifted but doesnt get its id updated like the others
-                compactedRow[0].id = `${row}0`
-
                 // fill with null and push the row
                 for (let col = 1; col <= 3; col++) {
                     compactedRow.push({
-                        id: `${row}${col}`,
+                        // id: `${row}${col}`,
                         value: null
                     })
+                    newEmptyCells.push(`${row}${col}`)
+
                 }
                 newBoard.push(compactedRow)
                 continue
@@ -136,10 +148,7 @@ export default function Game(props) {
 
                         // wont be summable, wont iterate there, just switch places
                         compactedRow[col].value = compactedRow[col + 1].value
-                        compactedRow[col].id = `${row}${col}`
-
-                        compactedRow[col+1].value = null
-                        compactedRow[col+1].id = `${row}${col+1}`
+                        compactedRow[col + 1].value = null
 
                         // current value got updated
                         curVal = compactedRow[col].value
@@ -148,16 +157,11 @@ export default function Game(props) {
                     // case 2 - there are two more elements in the array
                     else {
                         console.log('computation done, two more el in the array')
-                        
+
                         // shift the two left values back and set the last one to null 
                         compactedRow[col].value = compactedRow[col + 1].value
-                        compactedRow[col].id = `${row}${col}`
-
-                        compactedRow[col+1].value = compactedRow[col + 2].value
-                        compactedRow[col+1].id = `${row}${col+1}`
-
-                        compactedRow[col+2].value = null
-                        compactedRow[col+2].id = `${row}${col+2}`
+                        compactedRow[col + 1].value = compactedRow[col + 2].value
+                        compactedRow[col + 2].value = null
 
                         // current value got updated
                         curVal = compactedRow[col].value
@@ -170,11 +174,7 @@ export default function Game(props) {
                 if (curVal === adjVal) {
                     console.log('added!')
                     compactedRow[col].value *= 2
-                    compactedRow[col].id = `${row}${col}`
-
-                    compactedRow[col+1].value = null
-                    compactedRow[col+1].id = `${row}${col+1}`
-
+                    compactedRow[col + 1].value = null
                 }
             }
 
@@ -185,25 +185,85 @@ export default function Game(props) {
             console.log(`col is ${col}`)
             for (col; col < 4; col++) {
                 compactedRow.push({
-                    id: `${row}${col}`,
                     value: null
                 })
+                newEmptyCells.push(`${row}${col}`)
+
             }
             newBoard.push(compactedRow)
             continue
         }
+        setBoard(newBoard)
+        setEmptyTiles(newEmptyCells)
+    }
 
-        console.log(newBoard)
+    // const updateIDs = () => {
+    //     // clone board
+    //     let newBoard = []
+    //     for (let row = 0; row < 4; row++) {
+    //         newBoard.push(board[row].map(x=>x))
+    //     }
+
+    //     // update IDS
+    //     for (let row = 0; row < 4; row++) {
+    //         for (let col = 0; col < 4; col++) {
+    //             newBoard[row][col].id = `${row}${col}`
+    //         }
+    //     }
+
+    //     setBoard(newBoard)
+    // }
+
+    const slideDown = () => {
+        transposeBoard()
+        slideLeft()
+        transposeBoard()
+    }
+
+    const slideRight = () => {
+        reverseBoard()
+        // updateIDs()
+        console.log(board)
+        slideLeft()
+        console.log(board)
+        // updateIDs()
+        reverseBoard()
+        console.log(board)
+        // updateIDs()
+    }
+
+    // might be safer to return a reversed board and not touch the state
+    // TODO: use temp state/ref to do the calculations with slideLeft() and reverse()
+    // and then update the actual board
+    const reverseBoard = () => {
+        let newBoard = []
+        console.log('reversing')
+
+        for (let i = 0; i < 4; i++) {
+            let newRow = board[i].map(x => x).reverse()
+            for (let col=0; col<4; col++) {
+                newRow[col] = {
+                    ...newRow[col],
+                    id: `${i}${col}`
+                }
+            }
+            console.log('newRow')
+            console.log(newRow)
+            newBoard.push(newRow)
+        }
+        // console.log(newBoard)
         setBoard(newBoard)
     }
 
+    const transposeBoard = () => {
+
+    }
 
     return (
         <div className="container">
             {board.flat().map(tile => (
                 <Tile
-                    key={tile.id}
-                    id={tile.id}
+                    key={crypto.randomUUID()}
                     value={tile.value}
                 />
             ))}
