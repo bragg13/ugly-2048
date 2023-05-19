@@ -11,6 +11,7 @@ export default function Game(props) {
     const [gameOver, setGameOver] = useState(true)
     const [isLoading, setLoading] = useState(false)
 
+    // preparing the game
     useEffect(() => {
         setLoading(true)
 
@@ -29,14 +30,17 @@ export default function Game(props) {
 
         setBoard(g)
         emptyTiles.current = _emptyTiles
-
-        // push two random tiles
+        calcBoard.current = g
 
         // set game started
         setLoading(false)
         setGameOver(false)
+        pushRandomToGrid()
+        pushRandomToGrid()
+        
     }, [])
 
+    
     useEffect(() => {
         const keyPressHandler = (e) => {
             if (gameOver) {
@@ -53,30 +57,30 @@ export default function Game(props) {
                     console.log('left')
                     slideLeft()
                     break;
-
-                case 38:
-                    console.log('up')
+                    
+                    case 38:
+                        console.log('up')
                     slideUp()
                     break;
 
-                case 39:
-                    console.log('right')
+                    case 39:
+                        console.log('right')
                     slideRight();
                     break;
-                case 40:
-                    console.log('down')
+                    case 40:
+                        console.log('down')
                     slideDown()
                     break;
-                default:
-                    break;
-            }
-        };
-        document.addEventListener('keydown', keyPressHandler);
-        return () => {
-            document.removeEventListener('keydown', keyPressHandler);
-        };
-    });
-
+                    default:
+                        break;
+                    }
+                };
+                document.addEventListener('keydown', keyPressHandler);
+                return () => {
+                    document.removeEventListener('keydown', keyPressHandler);
+                };
+            });
+            
     const getEmptyTile = () => {
         let index = Math.floor(Math.random() * emptyTiles.current.length);
         let tileId = emptyTiles.current[index]
@@ -91,16 +95,18 @@ export default function Game(props) {
     const pushRandomToGrid = () => {
         let { tileI, tileJ } = getEmptyTile()
         let newArr = [[], [], [], []]
+        let newValue = (Math.floor(Math.random() * 2)+1)*2 // random number either 2 and 4
 
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 if (i == tileI && j == tileJ) {
-                    newArr[i].push({ value: 2 })
+                    newArr[i].push({ value: newValue })
                 } else {
-                    newArr[i].push(board[i][j])
+                    newArr[i].push(calcBoard.current[i][j])
                 }
             }
         }
+        calcBoard.current = newArr
         setBoard(newArr)
     }
 
@@ -258,7 +264,6 @@ export default function Game(props) {
 
     return (
         <>
-            <Header />
             <div className="container">
                 {isLoading
                     ?

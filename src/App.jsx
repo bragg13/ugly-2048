@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Paper } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import GameOverScreen from "./components/GameOverScreen/GameOverScreen.jsx";
 import Header from "./components/Header/Header.jsx";
 import Game from "./components/Game/Game.jsx";
@@ -15,13 +15,14 @@ function App() {
   };
 
   return (
-    // <Paper elevation={3}>
-
+    <>
+      <Typography textAlign={'center'} padding={'5px'} variant="h3">2048.js</Typography>
       <div className="game-container">
         {isGameOver && <GameOverScreen />}
+        <Header score={score} bestScore={bestScore}/>
         <Game />
       </div>
-    // </Paper>
+    </>
   );
 }
 
