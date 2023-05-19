@@ -9,8 +9,11 @@ export default function Game(props) {
     const calcBoard = useRef(null)
     const emptyTiles = useRef([])
     const [gameOver, setGameOver] = useState(true)
+    const [isLoading, setLoading] = useState(false)
 
     useEffect(() => {
+        setLoading(true)
+
         // initialise board
         let g = [[], [], [], []];
         let _emptyTiles = [];
@@ -30,6 +33,7 @@ export default function Game(props) {
         // push two random tiles
 
         // set game started
+        setLoading(false)
         setGameOver(false)
     }, [])
 
@@ -38,25 +42,30 @@ export default function Game(props) {
             if (gameOver) {
                 return;
             }
+
             switch (e.keyCode) {
                 case 32:
                     console.log('space')
                     pushRandomToGrid()
                     break;
+
                 case 37:
                     console.log('left')
                     slideLeft()
                     break;
+
                 case 38:
                     console.log('up')
-                    console.log(board)
+                    slideUp()
                     break;
+
                 case 39:
                     console.log('right')
                     slideRight();
                     break;
                 case 40:
                     console.log('down')
+                    slideDown()
                     break;
                 default:
                     break;
@@ -101,14 +110,14 @@ export default function Game(props) {
         // calcBoard.current = board     
 
         for (let row = 0; row < 4; row++) {
-            console.log(`[row ${row}`)
+            // console.log(`[row ${row}`)
 
             // remove tiles with value zero
             let compactedRow = calcBoard.current[row].filter(el => el.value !== null)
 
             // the row needs no computation - skip it
             if (compactedRow.length === 0) {
-                console.log('length 0 - no computation needed')
+                // console.log('length 0 - no computation needed')
                 // fill with null and push the row
                 for (let col = 0; col < 4; col++) {
                     compactedRow.push({
@@ -124,7 +133,7 @@ export default function Game(props) {
 
             // the row has only one value - make it the leftmost
             if (compactedRow.length === 1) {
-                console.log('length 1 - make it the leftmost')
+                // console.log('length 1 - make it the leftmost')
 
                 // fill with null and push the row
                 for (let col = 1; col <= 3; col++) {
@@ -148,7 +157,7 @@ export default function Game(props) {
                     // cannot be the last element in the array because of the cycle limit
                     // case 1 - there is one more element in the array
                     if (col + 1 === compactedRow.length - 1) {
-                        console.log('computation done, one more el in the array')
+                        // console.log('computation done, one more el in the array')
 
                         // wont be summable, wont iterate there, just switch places
                         compactedRow[col].value = compactedRow[col + 1].value
@@ -160,7 +169,7 @@ export default function Game(props) {
 
                     // case 2 - there are two more elements in the array
                     else {
-                        console.log('computation done, two more el in the array')
+                        // console.log('computation done, two more el in the array')
 
                         // shift the two left values back and set the last one to null 
                         compactedRow[col].value = compactedRow[col + 1].value
@@ -176,7 +185,7 @@ export default function Game(props) {
 
                 // if we can sum the two values
                 if (curVal === adjVal) {
-                    console.log('added!')
+                    // console.log('added!')
                     compactedRow[col].value *= 2
                     compactedRow[col + 1].value = null
                 }
@@ -186,7 +195,7 @@ export default function Game(props) {
             col += 1
 
             // fill with null and push the row
-            console.log(`col is ${col}`)
+            // console.log(`col is ${col}`)
             for (col; col < 4; col++) {
                 compactedRow.push({
                     value: null
@@ -209,42 +218,59 @@ export default function Game(props) {
     }
 
     const slideDown = () => {
+        calcBoard.current = board
         transposeBoard()
-        slideLeft()
+        reverseBoard()
+        move()
+        reverseBoard()
         transposeBoard()
+        setBoard(calcBoard.current)
+    }
+
+    const slideUp = () => {
+        calcBoard.current = board
+        transposeBoard()
+        move()
+        transposeBoard()
+        setBoard(calcBoard.current)
     }
 
     const slideRight = async () => {
         calcBoard.current = board
-
         reverseBoard()
         move()
         reverseBoard()
-
         setBoard(calcBoard.current)
-
     }
 
-    // might be safer to return a reversed board and not touch the state
-    // TODO: use temp state/ref to do the calculations with slideLeft() and reverse()
-    // and then update the actual board
     const reverseBoard = () => {
         let newBoard = calcBoard.current.map(row => [...row].reverse());
         calcBoard.current = newBoard
     }
 
     const transposeBoard = () => {
-
+        let newBoard = calcBoard.current[0]
+            .map((_, colIndex) => 
+                calcBoard.current.map(row => 
+                    row[colIndex]));
+        calcBoard.current = newBoard
     }
 
     return (
         <div className="container">
-            {board.flat().map(tile => (
-                <Tile
-                    key={crypto.randomUUID()}
-                    value={tile.value}
-                />
-            ))}
+            {isLoading
+            ?
+                <h1>Loading...</h1>
+            :
+            <>
+                {board.flat().map(tile => (
+                    <Tile
+                        key={crypto.randomUUID()}
+                        value={tile.value}
+                    />
+                ))}
+            </>
+        }
         </div>
     )
 }
