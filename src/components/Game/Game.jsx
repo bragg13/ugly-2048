@@ -1,29 +1,31 @@
 import { Container, Grid, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import './Game.css'
 import Tile from "../Tile/Tile";
+import { wait } from "@testing-library/user-event/dist/utils";
 
 export default function Game(props) {
     const [board, setBoard] = useState([])
-    const [emptyTiles, setEmptyTiles] = useState([])
+    const calcBoard = useRef(null)
+    const emptyTiles = useRef([])
     const [gameOver, setGameOver] = useState(true)
 
     useEffect(() => {
         // initialise board
         let g = [[], [], [], []];
-        let emptyTiles = [];
+        let _emptyTiles = [];
 
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 g[i].push({
                     value: null
                 })
-                emptyTiles.push(`${i}${j}`)
+                _emptyTiles.push(`${i}${j}`)
             }
         }
 
         setBoard(g)
-        setEmptyTiles(emptyTiles)
+        emptyTiles.current = _emptyTiles
 
         // push two random tiles
 
@@ -67,11 +69,12 @@ export default function Game(props) {
     });
 
     const getEmptyTile = () => {
-        let index = Math.floor(Math.random() * emptyTiles.length);
-        let tileId = emptyTiles[index]
+        let index = Math.floor(Math.random() * emptyTiles.current.length);
+        let tileId = emptyTiles.current[index]
 
         // remove element from empty tiles
-        setEmptyTiles(curr => curr.filter(_tile => _tile !== tileId))
+        let filtered = emptyTiles.current.filter(_tile => _tile !== tileId)
+        emptyTiles.current = filtered
 
         return {tileI: tileId[0], tileJ: tileId[1]}
     }
@@ -82,7 +85,7 @@ export default function Game(props) {
         
         for (let i=0; i<4; i++) {
             for (let j=0; j<4; j++) {
-                if (i===tileI && j===tileJ) {
+                if (i==tileI && j==tileJ) {
                     newArr[i].push({value: 2})
                 } else {
                     newArr[i].push(board[i][j])
@@ -92,15 +95,16 @@ export default function Game(props) {
         setBoard(newArr)
     }
 
-    const slideLeft = () => {
+    const move = () => {
         let newBoard = []
-        let newEmptyCells = []
+        let newEmptyTiles = []   
+        // calcBoard.current = board     
 
         for (let row = 0; row < 4; row++) {
             console.log(`[row ${row}`)
 
             // remove tiles with value zero
-            let compactedRow = board[row].filter(el => el.value !== null)
+            let compactedRow = calcBoard.current[row].filter(el => el.value !== null)
 
             // the row needs no computation - skip it
             if (compactedRow.length === 0) {
@@ -111,7 +115,7 @@ export default function Game(props) {
                         // id: `${row}${col}`,
                         value: null
                     })
-                    newEmptyCells.push(`${row}${col}`)
+                    newEmptyTiles.push(`${row}${col}`)
 
                 }
                 newBoard.push(compactedRow)
@@ -128,7 +132,7 @@ export default function Game(props) {
                         // id: `${row}${col}`,
                         value: null
                     })
-                    newEmptyCells.push(`${row}${col}`)
+                    newEmptyTiles.push(`${row}${col}`)
 
                 }
                 newBoard.push(compactedRow)
@@ -187,32 +191,22 @@ export default function Game(props) {
                 compactedRow.push({
                     value: null
                 })
-                newEmptyCells.push(`${row}${col}`)
+                newEmptyTiles.push(`${row}${col}`)
 
             }
             newBoard.push(compactedRow)
             continue
         }
-        setBoard(newBoard)
-        setEmptyTiles(newEmptyCells)
+        emptyTiles.current = newEmptyTiles
+        calcBoard.current = newBoard
+        
     }
 
-    // const updateIDs = () => {
-    //     // clone board
-    //     let newBoard = []
-    //     for (let row = 0; row < 4; row++) {
-    //         newBoard.push(board[row].map(x=>x))
-    //     }
-
-    //     // update IDS
-    //     for (let row = 0; row < 4; row++) {
-    //         for (let col = 0; col < 4; col++) {
-    //             newBoard[row][col].id = `${row}${col}`
-    //         }
-    //     }
-
-    //     setBoard(newBoard)
-    // }
+    const slideLeft = () => {
+        calcBoard.current = board;
+        move()
+        setBoard(calcBoard.current)
+    }
 
     const slideDown = () => {
         transposeBoard()
@@ -220,39 +214,23 @@ export default function Game(props) {
         transposeBoard()
     }
 
-    const slideRight = () => {
+    const slideRight = async () => {
+        calcBoard.current = board
+
         reverseBoard()
-        // updateIDs()
-        console.log(board)
-        slideLeft()
-        console.log(board)
-        // updateIDs()
+        move()
         reverseBoard()
-        console.log(board)
-        // updateIDs()
+
+        setBoard(calcBoard.current)
+
     }
 
     // might be safer to return a reversed board and not touch the state
     // TODO: use temp state/ref to do the calculations with slideLeft() and reverse()
     // and then update the actual board
     const reverseBoard = () => {
-        let newBoard = []
-        console.log('reversing')
-
-        for (let i = 0; i < 4; i++) {
-            let newRow = board[i].map(x => x).reverse()
-            for (let col=0; col<4; col++) {
-                newRow[col] = {
-                    ...newRow[col],
-                    id: `${i}${col}`
-                }
-            }
-            console.log('newRow')
-            console.log(newRow)
-            newBoard.push(newRow)
-        }
-        // console.log(newBoard)
-        setBoard(newBoard)
+        let newBoard = calcBoard.current.map(row => [...row].reverse());
+        calcBoard.current = newBoard
     }
 
     const transposeBoard = () => {
