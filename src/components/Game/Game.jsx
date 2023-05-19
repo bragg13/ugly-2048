@@ -2,7 +2,7 @@ import { Container, Grid, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import './Game.css'
 import Tile from "../Tile/Tile";
-import { wait } from "@testing-library/user-event/dist/utils";
+import Header from "../Header/Header"
 
 export default function Game(props) {
     const [board, setBoard] = useState([])
@@ -85,17 +85,17 @@ export default function Game(props) {
         let filtered = emptyTiles.current.filter(_tile => _tile !== tileId)
         emptyTiles.current = filtered
 
-        return {tileI: tileId[0], tileJ: tileId[1]}
+        return { tileI: tileId[0], tileJ: tileId[1] }
     }
 
     const pushRandomToGrid = () => {
         let { tileI, tileJ } = getEmptyTile()
-        let newArr = [[],[],[],[]]
-        
-        for (let i=0; i<4; i++) {
-            for (let j=0; j<4; j++) {
-                if (i==tileI && j==tileJ) {
-                    newArr[i].push({value: 2})
+        let newArr = [[], [], [], []]
+
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+                if (i == tileI && j == tileJ) {
+                    newArr[i].push({ value: 2 })
                 } else {
                     newArr[i].push(board[i][j])
                 }
@@ -106,7 +106,7 @@ export default function Game(props) {
 
     const move = () => {
         let newBoard = []
-        let newEmptyTiles = []   
+        let newEmptyTiles = []
         // calcBoard.current = board     
 
         for (let row = 0; row < 4; row++) {
@@ -208,7 +208,7 @@ export default function Game(props) {
         }
         emptyTiles.current = newEmptyTiles
         calcBoard.current = newBoard
-        
+
     }
 
     const slideLeft = () => {
@@ -250,27 +250,30 @@ export default function Game(props) {
 
     const transposeBoard = () => {
         let newBoard = calcBoard.current[0]
-            .map((_, colIndex) => 
-                calcBoard.current.map(row => 
+            .map((_, colIndex) =>
+                calcBoard.current.map(row =>
                     row[colIndex]));
         calcBoard.current = newBoard
     }
 
     return (
-        <div className="container">
-            {isLoading
-            ?
-                <h1>Loading...</h1>
-            :
-            <>
-                {board.flat().map(tile => (
-                    <Tile
-                        key={crypto.randomUUID()}
-                        value={tile.value}
-                    />
-                ))}
-            </>
-        }
-        </div>
+        <>
+            <Header />
+            <div className="container">
+                {isLoading
+                    ?
+                    <h1>Loading...</h1>
+                    :
+                    <>
+                        {board.flat().map(tile => (
+                            <Tile
+                                key={crypto.randomUUID()}
+                                value={tile.value}
+                            />
+                        ))}
+                    </>
+                }
+            </div>
+        </>
     )
 }

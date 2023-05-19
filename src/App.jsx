@@ -15,10 +15,13 @@ function App() {
   };
 
   return (
+    // <Paper elevation={3}>
+
       <div className="game-container">
         {isGameOver && <GameOverScreen />}
         <Game />
       </div>
+    // </Paper>
   );
 }
 
