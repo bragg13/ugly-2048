@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Typography } from '@mui/material';
 import './Tile.css'
 
-export default function Tile({value, prevId, id, merged}) {
+export default function Tile({value, prevId, id}) {
 
 const getClasses = () => {
   let color = (value===null) ? '0' : value
@@ -10,10 +10,10 @@ const getClasses = () => {
   if (value === null || (prevId.length===0 && value===null)) return `color-${color}`
   if (value!==null && prevId.length === 0) return `color-${color} anim-appear`
 
-  if (merged.length!==0) {
-    prevId[0] = merged[0]
-    prevId[1] = merged[1]
-  }
+  // if (merged.length!==0) {
+  //   prevId[0] = merged[0]
+  //   prevId[1] = merged[1]
+  // }
   
   let direction = ''
   let amount = ''
@@ -39,7 +39,7 @@ const getClasses = () => {
 
   }
 
-  return `color-${color} anim-moved slide-${direction} slide-${merged.length!==0 ? '1' : amount}`
+  return `color-${color} anim-moved slide-${direction} slide-${amount}`
   }
 
   return (
@@ -48,9 +48,8 @@ const getClasses = () => {
       className={`tile ${getClasses()}`}>
         <Typography
           fontWeight={'bold'}
-          fontFamily={"emoji"}
-          letterSpacing={'2px'}
-          fontSize={'1.5rem'}>
+          fontFamily={"fantasy"}
+          fontSize={'2rem'}>
             {value}
         </Typography>
       </div>

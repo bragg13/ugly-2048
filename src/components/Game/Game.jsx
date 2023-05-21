@@ -1,6 +1,6 @@
-import { Container, Grid, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import './Game.css'
+import { useThrottledCallback } from "use-debounce";
 import Tile from "../Tile/Tile";
 
 export default function Game({ handleScore, gameStatus, updateGameStatus }) {
@@ -15,11 +15,11 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
 
     const resetGame = () => {
         setLoading(true)
-    
+
         // initialise board
         let g = [[], [], [], []];
         let _emptyTiles = [];
-    
+
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 g[i].push({
@@ -31,23 +31,21 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                 _emptyTiles.push(`${i}${j}`)
             }
         }
-    
+
         setBoard(g)
         emptyTiles.current = _emptyTiles
         calcBoard.current = g
-    
+
         // set game started
         setLoading(false)
         pushRandomToGrid()
         pushRandomToGrid()
         setBoard(calcBoard.current)
-
     }
-
 
     // preparing the game
     useEffect(() => {
-        if (gameStatus==='starting') {
+        if (gameStatus === 'starting') {
             resetGame()
             updateGameStatus('playing')
         } else if (gameStatus === 'gameOver') {
@@ -64,7 +62,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
             updateEmptyTiles()
 
             // console.log(emptyTilesBackup.join('') !== emptyTiles.current.join(''))
-            
+
             if (emptyTilesBackup.join('') !== emptyTiles.current.join('')) {
                 console.log('movement')
                 // if there was, we can spawn a new tile
@@ -75,13 +73,12 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                 if (moved) {        // would be tooo slow if put in the first if
                     console.log('no movement')
                     // se non ci sono tile liberi, gameover
-                    if (emptyTiles.current.length===0) {
+                    if (emptyTiles.current.length === 0) {
                         updateGameStatus('gameOver')
                     }
-
                 }
             }
-            
+
             console.log(calcBoard.current)
             setMoved(false)
         }
@@ -89,45 +86,42 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
     }, [moved])
 
 
+    const handleKeyDown = (e) => {
+        // disables page scrolling with keyboard arrows
+        e.preventDefault();
+
+        switch (e.code) {
+            case "ArrowLeft":
+                slideLeft();
+                setMoved(true)
+                break;
+            case "ArrowRight":
+                slideRight();
+                setMoved(true)
+                break;
+            case "ArrowUp":
+                slideUp();
+                setMoved(true)
+                break;
+            case "ArrowDown":
+                slideDown();
+                setMoved(true)
+                break;
+        }
+    };
+
+    // protects the reducer from being flooded with events.
+    const throttledHandleKeyDown = useThrottledCallback(
+        handleKeyDown,
+        200,
+        { leading: true, trailing: false }
+    );
+
     useEffect(() => {
-        const keyPressHandler = (e) => {
-            switch (e.keyCode) {
-                case 32:
-                    console.log('space')
-                    pushRandomToGrid()
-                    break;
+        window.addEventListener("keydown", throttledHandleKeyDown);
 
-                case 37:
-                    console.log('left')
-                    slideLeft()
-                    setMoved(true)
-                    break;
-
-                case 38:
-                    console.log('up')
-                    slideUp()
-                    setMoved(true)
-                    break;
-
-                case 39:
-                    console.log('right')
-                    slideRight();
-                    setMoved(true)
-                    break;
-
-                case 40:
-                    console.log('down')
-                    slideDown()
-                    setMoved(true)
-                    break;
-
-                default:
-                    break;
-            }
-        };
-        document.addEventListener('keydown', keyPressHandler);
         return () => {
-            document.removeEventListener('keydown', keyPressHandler);
+            window.removeEventListener("keydown", throttledHandleKeyDown);
         };
     });
 
@@ -145,7 +139,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
     const pushRandomToGrid = () => {
         let { tileI, tileJ } = getEmptyTile()
         let newArr = [[], [], [], []]
-        let newValue = (Math.random()<=0.7) ? 2 : 4 
+        let newValue = (Math.random() <= 0.7) ? 2 : 4
 
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
@@ -155,13 +149,15 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                     obj = {
                         id: [i, j],
                         prevId: [],
-                        merged: [],
+                        // // merged: [],
                         value: newValue,
                     }
                     newArr[i].push(obj)
 
                 } else {
-                    newArr[i].push(calcBoard.current[i][j])
+                    newArr[i].push({
+                        ...calcBoard.current[i][j],
+                    })
                 }
             }
         }
@@ -185,7 +181,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                     // console.log(calcBoard.current[row][col])
                     compactedRow.push({
                         value: null,
-                        merged: [],
+                        // merged: [],
                         id: [row, col],
                         prevId: []
                     })
@@ -204,7 +200,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                     compactedRow.push({
                         value: null,
                         id: [row, col],
-                        merged: [],
+                        // merged: [],
                         prevId: []
                     })
 
@@ -254,7 +250,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                 if (curVal === adjVal) {
                     // console.log('added!')
                     compactedRow[col].value = curVal + adjVal
-                    compactedRow[col].merged = [row, col+1]
+                    compactedRow[col].merged = [row, col + 1]
                     compactedRow[col + 1].value = null
                     handleScore(compactedRow[col].value)
                 }
@@ -268,8 +264,8 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
             for (col; col < 4; col++) {
                 compactedRow.push({
                     value: null,
-                        merged: [],
-                        id: [row, col],
+                    // merged: [],
+                    id: [row, col],
                     prevId: []
                 })
 
@@ -278,6 +274,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
             continue
         }
         calcBoard.current = newBoard
+        console.log(calcBoard.current)
 
     }
 
@@ -286,7 +283,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
 
         calcBoard.current.map(
             (row, rowI) => row.map(
-                (col, colI)=> {
+                (col, colI) => {
                     // update empty tiles
                     if (calcBoard.current[rowI][colI].value === null) {
                         newEmptyTiles.push(`${rowI}${colI}`)
@@ -298,6 +295,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                         prevId: calcBoard.current[rowI][colI].id,
                         id: [rowI, colI]
                     }
+                    console.log(obj)
                     calcBoard.current[rowI][colI] = obj
 
                     // calcBoard.current[rowI][colI].prevId = calcBoard.current[rowI][colI].id
@@ -369,8 +367,6 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                                 value={tile.value}
                                 id={tile.id}
                                 prevId={tile.prevId}
-                                merged={tile.merged}
-                                // prevValue={tile.prevValue}
                             />
                         ))}
                     </>
@@ -382,5 +378,5 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
 
 
 // quando muovo devo anche settare value a null e prevValue alla prevValue
-// perche ora come ora 
+// perche ora come ora
 // quando muovo e sposto dei blocchi, i blocchi null che sostituisco devono avere id/prevId a null, TUTTO A NULL

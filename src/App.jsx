@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Paper, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import GameOverScreen from "./components/GameOverScreen/GameOverScreen.jsx";
 import Header from "./components/Header/Header.jsx";
 import Game from "./components/Game/Game.jsx";
