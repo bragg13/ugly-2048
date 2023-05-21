@@ -29,6 +29,9 @@
     text-align: center;
 }
 
+.newGameBtn:hover {
+    cursor: pointer;
+}
 .bestScore {
     background-color: 'gray';
     padding: 10px;

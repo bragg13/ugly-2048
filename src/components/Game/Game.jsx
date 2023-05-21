@@ -63,7 +63,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
             let emptyTilesBackup = [...emptyTiles.current]
             updateEmptyTiles()
 
-            console.log(emptyTilesBackup.join('') !== emptyTiles.current.join(''))
+            // console.log(emptyTilesBackup.join('') !== emptyTiles.current.join(''))
             
             if (emptyTilesBackup.join('') !== emptyTiles.current.join('')) {
                 console.log('movement')
@@ -74,9 +74,6 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
             } else {
                 if (moved) {        // would be tooo slow if put in the first if
                     console.log('no movement')
-                    console.log(gameStatus)
-                    console.log(emptyTilesBackup.join(''))
-                    console.log(emptyTiles.current.join(''))
                     // se non ci sono tile liberi, gameover
                     if (emptyTiles.current.length===0) {
                         updateGameStatus('gameOver')
@@ -85,6 +82,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                 }
             }
             
+            console.log(calcBoard.current)
             setMoved(false)
         }
 
@@ -147,7 +145,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
     const pushRandomToGrid = () => {
         let { tileI, tileJ } = getEmptyTile()
         let newArr = [[], [], [], []]
-        let newValue = (Math.random()<=0.6) ? 2 : 4 
+        let newValue = (Math.random()<=0.7) ? 2 : 4 
 
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
@@ -157,6 +155,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                     obj = {
                         id: [i, j],
                         prevId: [],
+                        merged: [],
                         value: newValue,
                     }
                     newArr[i].push(obj)
@@ -186,6 +185,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                     // console.log(calcBoard.current[row][col])
                     compactedRow.push({
                         value: null,
+                        merged: [],
                         id: [row, col],
                         prevId: []
                     })
@@ -204,6 +204,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                     compactedRow.push({
                         value: null,
                         id: [row, col],
+                        merged: [],
                         prevId: []
                     })
 
@@ -253,6 +254,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                 if (curVal === adjVal) {
                     // console.log('added!')
                     compactedRow[col].value = curVal + adjVal
+                    compactedRow[col].merged = [row, col+1]
                     compactedRow[col + 1].value = null
                     handleScore(compactedRow[col].value)
                 }
@@ -266,7 +268,8 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
             for (col; col < 4; col++) {
                 compactedRow.push({
                     value: null,
-                    id: [row, col],
+                        merged: [],
+                        id: [row, col],
                     prevId: []
                 })
 
@@ -366,6 +369,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                                 value={tile.value}
                                 id={tile.id}
                                 prevId={tile.prevId}
+                                merged={tile.merged}
                                 // prevValue={tile.prevValue}
                             />
                         ))}

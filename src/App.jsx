@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Paper, Typography } from "@mui/material";
 import GameOverScreen from "./components/GameOverScreen/GameOverScreen.jsx";
 import Header from "./components/Header/Header.jsx";
@@ -12,6 +12,7 @@ function App() {
     nmoves: 0
   });
   const [gameStatus, setGameStatus] = useState('starting')
+  const storageBestScore = useRef(0)
 
   useEffect(() => {
     loadBestScore()
@@ -19,10 +20,11 @@ function App() {
 
   const loadBestScore = () => {
     // get best score from storage
-    let _bs = JSON.parse(localStorage.getItem('bestScore'))
+    storageBestScore.current = JSON.parse(localStorage.getItem('bestScore'))
+
     setScore(prevScore => ({
       ...prevScore,
-      bestScore: (_bs===null) ? 0 : _bs
+      bestScore: (storageBestScore.current===null) ? 0 : storageBestScore.current
     }))
   }
 
@@ -35,7 +37,7 @@ function App() {
     }))
     
     // dont wanna call this all the time 
-    if ((score.bestScore+newScore) > JSON.parse(localStorage.getItem('bestScore'))) {
+    if ((score.score+newScore) > storageBestScore.current) {
       document.getElementById('bestScore-star').style.visibility = 'visible'
     }
   };
