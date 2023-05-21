@@ -1,0 +1,44 @@
+#bestScore-star {
+    visibility: hidden;
+    animation: star-bouncing infinite 1.5s ease-in-out;
+}
+
+@keyframes star-bouncing {
+    0% {
+        width: 40px;
+    }
+    50% {
+        width: 50px;
+    }
+    to {
+        width: 40px;
+    }
+}
+
+.headerGrid {
+    align-items: center;
+    justify-content: center;
+    column-gap: 4;
+    padding: 2%;
+}
+
+.newGameBtn {
+    background-color: 'gray';
+    padding: 10px;
+    border-radius: 7px;
+    text-align: center;
+}
+
+.bestScore {
+    background-color: 'gray';
+    padding: 10px;
+    border-radius: 7px;
+    text-align: center;
+}
+
+.score {
+    background-color: 'gray';
+    padding: 10px;
+    border-radius: 7px;
+    text-align: center;
+}

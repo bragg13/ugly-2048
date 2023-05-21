@@ -3,21 +3,21 @@ import { useEffect, useRef, useState } from "react";
 import './Game.css'
 import Tile from "../Tile/Tile";
 
-export default function Game({ handleScore }) {
+export default function Game({ handleScore, gameStatus, updateGameStatus }) {
     const [board, setBoard] = useState([])
     const calcBoard = useRef(null)
     const emptyTiles = useRef([])
-    const [gameOver, setGameOver] = useState(true)
+    // const [gameStatus, setGameStatus] = useState('start')
     const [isLoading, setLoading] = useState(false)
 
-    // preparing the game
-    useEffect(() => {
-        setLoading(true)
 
+    const resetGame = () => {
+        setLoading(true)
+    
         // initialise board
         let g = [[], [], [], []];
         let _emptyTiles = [];
-
+    
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 g[i].push({
@@ -29,25 +29,36 @@ export default function Game({ handleScore }) {
                 _emptyTiles.push(`${i}${j}`)
             }
         }
-
+    
         setBoard(g)
         emptyTiles.current = _emptyTiles
         calcBoard.current = g
-
+    
         // set game started
         setLoading(false)
-        setGameOver(false)
         pushRandomToGrid()
         pushRandomToGrid()
 
-    }, [])
+    }
+
+
+    // preparing the game
+    useEffect(() => {
+        if (gameStatus==='starting') {
+            resetGame()
+            updateGameStatus('playing')
+        }
+        // if (gameStatus==='gameOver') {
+
+        // }
+        // if (gameStatus==='restarting') {
+
+        // }
+    }, [gameStatus])
 
 
     useEffect(() => {
         const keyPressHandler = (e) => {
-            if (gameOver) {
-                return;
-            }
 
             switch (e.keyCode) {
                 case 32:
