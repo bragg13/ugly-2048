@@ -30,15 +30,18 @@ const getClasses = () => {
   }
 
   return (
-    <div 
-    className={`tile ${getClasses()}`}>
-      <Typography
-        fontWeight={'bold'}
-        fontFamily={"emoji"}
-        letterSpacing={'2px'}
-        fontSize={'1.5rem'}>
-          {value}
-      </Typography>
+    <div className='tile color-0'>
+      <div 
+      className={`tile ${getClasses()}`}>
+        <Typography
+          fontWeight={'bold'}
+          fontFamily={"emoji"}
+          letterSpacing={'2px'}
+          fontSize={'1.5rem'}>
+            {value}
+        </Typography>
+      </div>
+
     </div>
   )
 }

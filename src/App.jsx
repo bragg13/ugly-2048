@@ -8,9 +8,9 @@ import './App.css'
 function App() {
   const [score, setScore] = useState({
     score: 0,
-    bestScore: 0
+    bestScore: 0,
+    nmoves: 0
   });
-  // const [bestScore, setBestScore] = useState(0); // TODO: load from storage
   const [gameStatus, setGameStatus] = useState('starting')
 
   useEffect(() => {
@@ -30,7 +30,8 @@ function App() {
   const handleScore = newScore => {
     setScore(prevScore => ({
       score: prevScore.score + newScore,
-      bestScore: (prevScore.score+newScore > prevScore.bestScore) ? prevScore.score + newScore : prevScore.bestScore
+      bestScore: (prevScore.score+newScore > prevScore.bestScore) ? prevScore.score + newScore : prevScore.bestScore,
+      nmoves: prevScore.nmoves + 1
     }))
     
     // dont wanna call this all the time 
@@ -47,7 +48,8 @@ function App() {
     localStorage.setItem('bestScore', score.bestScore)
     setScore({
       score: 0,
-      bestScore: score.bestScore
+      bestScore: score.bestScore,
+      nmoves: 0
     })
 
     // restart game
@@ -57,16 +59,12 @@ function App() {
   return (
     <>
       <Typography textAlign={'center'} padding={'5px'} variant="h3">2048.js</Typography>
-      <div className="game-container">
-        {gameStatus === 'gameover' 
-        ?
-          <GameOverScreen restartGame={restartGame} />
-        :
-        <>
+      <div className="game-container elevation-3">
+        {gameStatus === 'gameOver' &&
+          <GameOverScreen restartGame={restartGame} score={score} onClose={restartGame} open={(gameStatus==='gameOver')}/>
+        }
           <Header restartGame={restartGame} score={score} />
           <Game handleScore={handleScore} gameStatus={gameStatus} updateGameStatus={val => setGameStatus(val)} />
-        </>
-        }
       </div>
     </>
   );

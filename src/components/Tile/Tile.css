@@ -24,7 +24,7 @@
 }
 
 .anim-appear { animation: appear 0.5s; }
-.anim-moved { animation: slide 1s; }
+.anim-moved { animation: slide 0.2s; }
 
 .slide-1 {
     --movementAmount: 1

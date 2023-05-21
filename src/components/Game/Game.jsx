@@ -7,6 +7,8 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
     const [board, setBoard] = useState([])
     const calcBoard = useRef(null)
     const emptyTiles = useRef([])
+    const [moved, setMoved] = useState(false)
+
     // const [gameStatus, setGameStatus] = useState('start')
     const [isLoading, setLoading] = useState(false)
 
@@ -38,6 +40,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
         setLoading(false)
         pushRandomToGrid()
         pushRandomToGrid()
+        setBoard(calcBoard.current)
 
     }
 
@@ -47,19 +50,49 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
         if (gameStatus==='starting') {
             resetGame()
             updateGameStatus('playing')
+        } else if (gameStatus === 'gameOver') {
+            console.log('GAME OVER')
         }
-        // if (gameStatus==='gameOver') {
-
-        // }
-        // if (gameStatus==='restarting') {
-
-        // }
     }, [gameStatus])
+
+    // check for winning or losing conditions
+    // this gets triggered after slideLeft()/Right()/...
+    useEffect(() => {
+        if (gameStatus === 'playing') {
+            // check if there was an actual movement
+            let emptyTilesBackup = [...emptyTiles.current]
+            updateEmptyTiles()
+
+            console.log(emptyTilesBackup.join('') !== emptyTiles.current.join(''))
+            
+            if (emptyTilesBackup.join('') !== emptyTiles.current.join('')) {
+                console.log('movement')
+                // if there was, we can spawn a new tile
+                pushRandomToGrid()
+                setBoard(calcBoard.current)
+
+            } else {
+                if (moved) {        // would be tooo slow if put in the first if
+                    console.log('no movement')
+                    console.log(gameStatus)
+                    console.log(emptyTilesBackup.join(''))
+                    console.log(emptyTiles.current.join(''))
+                    // se non ci sono tile liberi, gameover
+                    if (emptyTiles.current.length===0) {
+                        updateGameStatus('gameOver')
+                    }
+
+                }
+            }
+            
+            setMoved(false)
+        }
+
+    }, [moved])
 
 
     useEffect(() => {
         const keyPressHandler = (e) => {
-
             switch (e.keyCode) {
                 case 32:
                     console.log('space')
@@ -69,33 +102,27 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
                 case 37:
                     console.log('left')
                     slideLeft()
-                    updateEmptyTiles()
-                    pushRandomToGrid()
-                    console.log(calcBoard.current)
+                    setMoved(true)
                     break;
 
                 case 38:
                     console.log('up')
                     slideUp()
-                    updateEmptyTiles()
-                    pushRandomToGrid()
-                    console.log(calcBoard.current)
+                    setMoved(true)
                     break;
 
                 case 39:
                     console.log('right')
                     slideRight();
-                    updateEmptyTiles()
-                    pushRandomToGrid()
-                    console.log(calcBoard.current)
+                    setMoved(true)
                     break;
+
                 case 40:
                     console.log('down')
                     slideDown()
-                    updateEmptyTiles()
-                    pushRandomToGrid()
-                    console.log(calcBoard.current)
+                    setMoved(true)
                     break;
+
                 default:
                     break;
             }
@@ -140,7 +167,6 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
             }
         }
         calcBoard.current = newArr
-        setBoard(newArr)
     }
 
     const move = () => {
@@ -278,15 +304,13 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
         )
 
         emptyTiles.current = newEmptyTiles
-        console.log(calcBoard.current)
-        setBoard(calcBoard.current)
-
+        // console.log(calcBoard.current)
     }
 
     const slideLeft = () => {
         calcBoard.current = board;
         move()
-        setBoard(calcBoard.current)
+        // setBoard(calcBoard.current)
     }
 
     const slideDown = () => {
@@ -296,7 +320,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
         move()
         reverseBoard()
         transposeBoard()
-        setBoard(calcBoard.current)
+        // setBoard(calcBoard.current)
     }
 
     const slideUp = () => {
@@ -304,7 +328,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
         transposeBoard()
         move()
         transposeBoard()
-        setBoard(calcBoard.current)
+        // setBoard(calcBoard.current)
     }
 
     const slideRight = async () => {
@@ -312,7 +336,7 @@ export default function Game({ handleScore, gameStatus, updateGameStatus }) {
         reverseBoard()
         move()
         reverseBoard()
-        setBoard(calcBoard.current)
+        // setBoard(calcBoard.current)
     }
 
     const reverseBoard = () => {
