@@ -2,9 +2,8 @@ import { Container, Grid, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import './Game.css'
 import Tile from "../Tile/Tile";
-import Header from "../Header/Header"
 
-export default function Game(props) {
+export default function Game({ handleScore }) {
     const [board, setBoard] = useState([])
     const calcBoard = useRef(null)
     const emptyTiles = useRef([])
@@ -22,7 +21,10 @@ export default function Game(props) {
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 g[i].push({
-                    value: null
+                    value: null,
+                    // prevValue: null,
+                    id: [i, j],
+                    prevId: []
                 })
                 _emptyTiles.push(`${i}${j}`)
             }
@@ -37,10 +39,10 @@ export default function Game(props) {
         setGameOver(false)
         pushRandomToGrid()
         pushRandomToGrid()
-        
+
     }, [])
 
-    
+
     useEffect(() => {
         const keyPressHandler = (e) => {
             if (gameOver) {
@@ -56,31 +58,43 @@ export default function Game(props) {
                 case 37:
                     console.log('left')
                     slideLeft()
-                    break;
-                    
-                    case 38:
-                        console.log('up')
-                    slideUp()
+                    updateEmptyTiles()
+                    pushRandomToGrid()
+                    console.log(calcBoard.current)
                     break;
 
-                    case 39:
-                        console.log('right')
+                case 38:
+                    console.log('up')
+                    slideUp()
+                    updateEmptyTiles()
+                    pushRandomToGrid()
+                    console.log(calcBoard.current)
+                    break;
+
+                case 39:
+                    console.log('right')
                     slideRight();
+                    updateEmptyTiles()
+                    pushRandomToGrid()
+                    console.log(calcBoard.current)
                     break;
-                    case 40:
-                        console.log('down')
+                case 40:
+                    console.log('down')
                     slideDown()
+                    updateEmptyTiles()
+                    pushRandomToGrid()
+                    console.log(calcBoard.current)
                     break;
-                    default:
-                        break;
-                    }
-                };
-                document.addEventListener('keydown', keyPressHandler);
-                return () => {
-                    document.removeEventListener('keydown', keyPressHandler);
-                };
-            });
-            
+                default:
+                    break;
+            }
+        };
+        document.addEventListener('keydown', keyPressHandler);
+        return () => {
+            document.removeEventListener('keydown', keyPressHandler);
+        };
+    });
+
     const getEmptyTile = () => {
         let index = Math.floor(Math.random() * emptyTiles.current.length);
         let tileId = emptyTiles.current[index]
@@ -95,12 +109,20 @@ export default function Game(props) {
     const pushRandomToGrid = () => {
         let { tileI, tileJ } = getEmptyTile()
         let newArr = [[], [], [], []]
-        let newValue = (Math.floor(Math.random() * 2)+1)*2 // random number either 2 and 4
+        let newValue = (Math.random()<=0.6) ? 2 : 4 
 
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
+                let obj
+
                 if (i == tileI && j == tileJ) {
-                    newArr[i].push({ value: newValue })
+                    obj = {
+                        id: [i, j],
+                        prevId: [],
+                        value: newValue,
+                    }
+                    newArr[i].push(obj)
+
                 } else {
                     newArr[i].push(calcBoard.current[i][j])
                 }
@@ -112,8 +134,6 @@ export default function Game(props) {
 
     const move = () => {
         let newBoard = []
-        let newEmptyTiles = []
-        // calcBoard.current = board     
 
         for (let row = 0; row < 4; row++) {
             // console.log(`[row ${row}`)
@@ -126,11 +146,12 @@ export default function Game(props) {
                 // console.log('length 0 - no computation needed')
                 // fill with null and push the row
                 for (let col = 0; col < 4; col++) {
+                    // console.log(calcBoard.current[row][col])
                     compactedRow.push({
-                        // id: `${row}${col}`,
-                        value: null
+                        value: null,
+                        id: [row, col],
+                        prevId: []
                     })
-                    newEmptyTiles.push(`${row}${col}`)
 
                 }
                 newBoard.push(compactedRow)
@@ -144,10 +165,10 @@ export default function Game(props) {
                 // fill with null and push the row
                 for (let col = 1; col <= 3; col++) {
                     compactedRow.push({
-                        // id: `${row}${col}`,
-                        value: null
+                        value: null,
+                        id: [row, col],
+                        prevId: []
                     })
-                    newEmptyTiles.push(`${row}${col}`)
 
                 }
                 newBoard.push(compactedRow)
@@ -166,8 +187,10 @@ export default function Game(props) {
                         // console.log('computation done, one more el in the array')
 
                         // wont be summable, wont iterate there, just switch places
+                        // compactedRow[col].prevValue = compactedRow[col].value
                         compactedRow[col].value = compactedRow[col + 1].value
                         compactedRow[col + 1].value = null
+                        // compactedRow[col + 1].prevId = null     // dovrebbe essere inutile perche quando instanzio un nuovo blocco gli do prevId null di base
 
                         // current value got updated
                         curVal = compactedRow[col].value
@@ -192,8 +215,9 @@ export default function Game(props) {
                 // if we can sum the two values
                 if (curVal === adjVal) {
                     // console.log('added!')
-                    compactedRow[col].value *= 2
+                    compactedRow[col].value = curVal + adjVal
                     compactedRow[col + 1].value = null
+                    handleScore(compactedRow[col].value)
                 }
             }
 
@@ -204,16 +228,47 @@ export default function Game(props) {
             // console.log(`col is ${col}`)
             for (col; col < 4; col++) {
                 compactedRow.push({
-                    value: null
+                    value: null,
+                    id: [row, col],
+                    prevId: []
                 })
-                newEmptyTiles.push(`${row}${col}`)
 
             }
             newBoard.push(compactedRow)
             continue
         }
-        emptyTiles.current = newEmptyTiles
         calcBoard.current = newBoard
+
+    }
+
+    const updateEmptyTiles = () => {
+        let newEmptyTiles = []
+
+        calcBoard.current.map(
+            (row, rowI) => row.map(
+                (col, colI)=> {
+                    // update empty tiles
+                    if (calcBoard.current[rowI][colI].value === null) {
+                        newEmptyTiles.push(`${rowI}${colI}`)
+                    }
+
+                    // update IDs
+                    let obj = {
+                        ...calcBoard.current[rowI][colI],
+                        prevId: calcBoard.current[rowI][colI].id,
+                        id: [rowI, colI]
+                    }
+                    calcBoard.current[rowI][colI] = obj
+
+                    // calcBoard.current[rowI][colI].prevId = calcBoard.current[rowI][colI].id
+                    // calcBoard.current[rowI][colI].id = [rowI, colI]
+                }
+            )
+        )
+
+        emptyTiles.current = newEmptyTiles
+        console.log(calcBoard.current)
+        setBoard(calcBoard.current)
 
     }
 
@@ -274,6 +329,9 @@ export default function Game(props) {
                             <Tile
                                 key={crypto.randomUUID()}
                                 value={tile.value}
+                                id={tile.id}
+                                prevId={tile.prevId}
+                                // prevValue={tile.prevValue}
                             />
                         ))}
                     </>
@@ -282,3 +340,8 @@ export default function Game(props) {
         </>
     )
 }
+
+
+// quando muovo devo anche settare value a null e prevValue alla prevValue
+// perche ora come ora 
+// quando muovo e sposto dei blocchi, i blocchi null che sostituisco devono avere id/prevId a null, TUTTO A NULL

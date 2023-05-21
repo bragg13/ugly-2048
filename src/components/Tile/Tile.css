@@ -6,45 +6,104 @@
     width: 100%;
     height: 100%;
     border-radius: 3px;
-    background: var(--0);
+    background: var(--0);   
+    --tileSize: 96.25px;
+}
+
+@keyframes appear {
+    from { opacity: 0; transform: scale3d(0.5, 0.5, 0.5); }
+    to { opacity: 1; transform: scale3d(1, 1, 1); }
+}
+@keyframes slide {
+    from { 
+        transform: translate(
+            calc(var(--tileSize) * var(--movementAmount) * var(--movementX)), 
+            calc(var(--tileSize) * var(--movementAmount) * var(--movementY)) 
+        ); }
+    to { transform: translate(0, 0); }
+}
+
+.anim-appear { animation: appear 0.5s; }
+.anim-moved { animation: slide 1s; }
+
+.slide-1 {
+    --movementAmount: 1
+}
+.slide-2 {
+    --movementAmount: 2
+}
+.slide-3 {
+    --movementAmount: 3
+}
+
+.slide-right {
+    --movementX: -1; 
+    --movementY: 0; 
+}
+.slide-left {
+    --movementX: 1; 
+    --movementY: 0; 
+}
+.slide-down {
+    --movementY: -1; 
+    --movementX: 0; 
+}
+.slide-up {
+    --movementY: 1; 
+    --movementX: 0; 
 }
 
 .color-0 {
-    background-color: var(--color-0);
+    background-color: var(--0);
     color: white
 }
 
 .color-2 {
-    background-color: var(--color-2);
-    color: white
+    background-color: var(--2);
+    color: #747160;
 }
 
 .color-4 {
-    background-color: var(--color-4);
-    color: white
+    background-color: var(--4);
+    color: #747160;
 }
 
 .color-8 {
-    background-color: var(--color-8);
-    color: white
+    background-color: var(--8);
+    color: white;
 }
 
 .color-16 {
-    background-color: var(--color-16);
+    background-color: var(--16);
     color: white
 }
 
 .color-32 {
-    background-color: var(--color-32);
+    background-color: var(--32);
     color: white
 }
 
 .color-64 {
-    background-color: var(--color-64);
+    background-color: var(--64);
     color: white
 }
 
 .color-128 {
-    background-color: var(--color-128);
+    background-color: var(--128);
     color: white
 }
+
+
+  /* block colors */
+  /* --0: #ccc0b4;
+  --2: #f0e3da;
+  --4: #ece0ca;
+  --8: #f2b179;
+  --16: #ec8d53;
+  --32: #f57c5f;
+  --64: #e95839;
+  --128: #f4d86d;
+  --256: #f4d86d;
+  --512: #f4d86d;
+  --1024: #f4d86d;
+  --2048: #f4d86d; */
