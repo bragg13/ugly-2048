@@ -6,8 +6,7 @@ Was fun though!
 
 The whole app is designed in React, the animations use simple css. 
 
-![image](https://github.com/user-attachments/assets/eb60fa91-b042-4279-bd1a-0c47c0aaebd6)
-
+![](https://github.com/bragg13/ugly-2048/blob/main/2048.gif)
 
 ## How to run
 In the project directory, you can run:
