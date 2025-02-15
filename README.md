@@ -6,8 +6,10 @@ Was fun though!
 
 The whole app is designed in React, the animations use simple css. 
 
-## Available Scripts
+![image](https://github.com/user-attachments/assets/eb60fa91-b042-4279-bd1a-0c47c0aaebd6)
 
+
+## How to run
 In the project directory, you can run:
 
 ### `npm start`
